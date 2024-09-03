@@ -23,16 +23,18 @@ public class UserInfoRVAdapter extends RecyclerView.Adapter<UserInfoRVAdapter.It
 
     private ValueFilter valueFilter;
     private static final ArrayList<ListUsers> defaultKeyWords = new ArrayList<>();
-    private static List<ListUsers> listUsersList;
+    private static List<ListUsers> listUsersListItemData;
 
-    public UserInfoRVAdapter(List<ListUsers> listUsers) {
-        listUsersList = listUsers;
-        defaultKeyWords.addAll(listUsers);
+    public UserInfoRVAdapter(List<ListUsers> listUserItemData) {
+        listUsersListItemData = listUserItemData;
+        defaultKeyWords.addAll(listUserItemData);
     }
 
     public void setUserBasicList(List<ListUsers> list) {
-        listUsersList.clear();
-        listUsersList.addAll(list);
+        listUsersListItemData.clear();
+        defaultKeyWords.clear();
+        listUsersListItemData.addAll(list);
+        defaultKeyWords.addAll(list);
         notifyDataSetChanged();
     }
 
@@ -46,7 +48,7 @@ public class UserInfoRVAdapter extends RecyclerView.Adapter<UserInfoRVAdapter.It
 
     @Override
     public int getItemCount() {
-        return listUsersList.size();
+        return listUsersListItemData.size();
     }
 
     @NonNull
@@ -59,7 +61,7 @@ public class UserInfoRVAdapter extends RecyclerView.Adapter<UserInfoRVAdapter.It
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        ListUsers user = listUsersList.get(position);
+        ListUsers user = listUsersListItemData.get(position);
         holder.bindData(user);
     }
 
@@ -110,7 +112,7 @@ public class UserInfoRVAdapter extends RecyclerView.Adapter<UserInfoRVAdapter.It
         @Override
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
             if (filterResults.values instanceof ArrayList) {
-                listUsersList = (List<ListUsers>) filterResults.values;
+                listUsersListItemData = (List<ListUsers>) filterResults.values;
                 notifyDataSetChanged();
             }
         }

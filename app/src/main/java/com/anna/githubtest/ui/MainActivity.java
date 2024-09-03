@@ -2,18 +2,16 @@ package com.anna.githubtest.ui;
 
 import android.os.Bundle;
 import android.widget.LinearLayout;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.anna.githubtest.ui.adaper.UserInfoRVAdapter;
 import com.anna.githubtest.databinding.ActivityMainBinding;
 import com.anna.githubtest.ui.viewmodel.MainViewModel;
-
 import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,15 +23,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        initView(binding);
-        mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
-        viewObserve();
-    }
 
-    private void viewObserve() {
-        mainViewModel.getUserBasicList().observe(this, userList -> {
-            userInfoRVAdapter.setUserBasicList(userList);
-        });
+        initView(binding);
+        initViewModel();
+        viewObserve();
     }
 
     private void initView(ActivityMainBinding binding) {
@@ -44,11 +37,22 @@ public class MainActivity extends AppCompatActivity {
         binding.searchView.setOnQueryTextListener(onQueryTextListener());
     }
 
+    private void initViewModel() {
+        mainViewModel = new ViewModelProvider(this,
+                ViewModelProvider.Factory.from(MainViewModel.initializer)).get(MainViewModel.class);
+        mainViewModel.callApiGetListUsers();
+    }
+
+    private void viewObserve() {
+        mainViewModel.getUserBasicList().observe(this, userList -> {
+            userInfoRVAdapter.setUserBasicList(userList);
+        });
+    }
+
     private SearchView.OnQueryTextListener onQueryTextListener() {
         return new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mainViewModel.callApiGetListUsers();
                 return false;
             }
 
