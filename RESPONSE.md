@@ -21,8 +21,7 @@
 
 ### Third party libs
 - Retrofit
-- OkHttp
-- RxJava 
+- OkHttp 
 - Glide
 
 ---
