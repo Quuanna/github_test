@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,7 +48,7 @@ public class DetailActivity extends AppCompatActivity {
             loginId = getIntent().getStringExtra(INTENT_EXTRA_KEY);
         }
 
-        showProgress(true);
+
         initViewModel();
         viewObserve();
     }
@@ -62,8 +63,23 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void viewObserve() {
-        detailViewModel.getDetailInfo().observe(this, detailInfo -> {
+        detailViewModel.getUiState().observe(this, uiState -> {
+            switch (uiState) {
+                case ERROR:
+                    showProgress(false);
+                    Toast.makeText(this, "Network Request failed", Toast.LENGTH_LONG).show();
+                    break;
+                case LOADING:
+                    showProgress(true);
+                    break;
+                case SUCCESS:
+                    showProgress(false);
 
+                    break;
+            }
+        });
+
+        detailViewModel.getDetailInfo().observe(this, detailInfo -> {
             setupView(detailInfo);
             if (loginId != null) {
                 detailViewModel.callApiPublicRepos(loginId);
@@ -95,7 +111,6 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(List<PublicRepos> publicRepos) {
-        showProgress(false);
         DetailAdapter detailAdapter = new DetailAdapter(publicRepos);
         binding.recyclerView.setAdapter(detailAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -116,6 +131,5 @@ public class DetailActivity extends AppCompatActivity {
         } else {
             binding.contentLoadingProgressBar.hide();
         }
-
     }
 }

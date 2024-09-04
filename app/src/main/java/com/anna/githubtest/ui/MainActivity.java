@@ -4,6 +4,7 @@ import static com.anna.githubtest.ui.DetailActivity.getActivityIntent;
 
 import android.os.Bundle;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -17,21 +18,22 @@ import com.anna.githubtest.ui.viewmodel.MainViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
+    private ActivityMainBinding binding;
     private MainViewModel mainViewModel;
     private UserInfoAdapter userInfoAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        initView(binding);
+        initView();
         initViewModel();
         viewObserve();
     }
 
-    private void initView(ActivityMainBinding binding) {
+    private void initView() {
         userInfoAdapter = new UserInfoAdapter(new UserInfoAdapter.DiffUtilCallback());
         userInfoAdapter.addOnItemClickListener(onItemClickListener());
         binding.recyclerView.setAdapter(userInfoAdapter);
@@ -47,6 +49,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void viewObserve() {
+        mainViewModel.getUiState().observe(this, uiState -> {
+            switch (uiState) {
+                case ERROR:
+                    showProgress(false);
+                    Toast.makeText(this, "Network Request failed", Toast.LENGTH_LONG).show();
+                    break;
+                case LOADING:
+                    showProgress(true);
+                    break;
+                case SUCCESS:
+                    showProgress(false);
+
+                    break;
+            }
+        });
+
         mainViewModel.getUserBasicList().observe(this, userList -> userInfoAdapter.setData(userList));
     }
 
@@ -67,5 +85,13 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         };
+    }
+
+    private void showProgress(Boolean isShow) {
+        if (isShow) {
+            binding.contentLoadingProgressBar.show();
+        } else {
+            binding.contentLoadingProgressBar.hide();
+        }
     }
 }

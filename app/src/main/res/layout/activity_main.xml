@@ -27,4 +27,16 @@
         tools:itemCount="2"
         tools:listitem="@layout/list_item_user_view"/>
 
+    <!--progressBar-->
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/contentLoadingProgressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </LinearLayout>

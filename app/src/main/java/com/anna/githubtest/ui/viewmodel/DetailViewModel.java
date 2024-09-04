@@ -11,6 +11,7 @@ import com.anna.githubtest.core.model.GetUserDetailResponse;
 import com.anna.githubtest.core.model.PublicReposResponse;
 import com.anna.githubtest.data.DetailInfo;
 import com.anna.githubtest.data.PublicRepos;
+import com.anna.githubtest.element.UiState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DetailViewModel extends ViewModel {
+public class DetailViewModel extends BaseViewModel {
 
     private final GitHubService apiService;
 
@@ -28,14 +29,12 @@ public class DetailViewModel extends ViewModel {
     }
 
     public static final ViewModelInitializer<DetailViewModel> initializer = new ViewModelInitializer<>(
-            DetailViewModel.class,
-            creationExtras -> new DetailViewModel(GithubCline.getInstance())
+            DetailViewModel.class, creationExtras -> new DetailViewModel(GithubCline.getInstance())
     );
 
     public LiveData<DetailInfo> getDetailInfo() {
         return detailInfo;
     }
-
     public LiveData<List<PublicRepos>> getPublicRepos() {
         return publicRepos;
     }
@@ -49,6 +48,7 @@ public class DetailViewModel extends ViewModel {
      * @param name login
      */
     public void callApiGetUserDetail(String name) {
+        uiState.setValue(UiState.LOADING);
         apiService.fetchUsersDetail(name).enqueue(new Callback<GetUserDetailResponse>() {
             @Override
             public void onResponse(Call<GetUserDetailResponse> call, Response<GetUserDetailResponse> response) {
@@ -64,11 +64,12 @@ public class DetailViewModel extends ViewModel {
                     info.setBlog(response.body().getBlog());
                 }
                 detailInfo.postValue(info);
+                uiState.setValue(UiState.SUCCESS);
             }
 
             @Override
             public void onFailure(Call<GetUserDetailResponse> call, Throwable throwable) {
-                // TODO Network request fail
+                uiState.setValue(UiState.ERROR);
             }
         });
     }
@@ -79,6 +80,7 @@ public class DetailViewModel extends ViewModel {
      * @param name login
      */
     public void callApiPublicRepos(String name) {
+        uiState.setValue(UiState.LOADING);
         apiService.fetchUserRepos(name).enqueue(new Callback<List<PublicReposResponse>>() {
             @Override
             public void onResponse(Call<List<PublicReposResponse>> call, Response<List<PublicReposResponse>> response) {
@@ -93,11 +95,12 @@ public class DetailViewModel extends ViewModel {
                     }
                 }
                 publicRepos.postValue(list);
+                uiState.setValue(UiState.SUCCESS);
             }
 
             @Override
             public void onFailure(Call<List<PublicReposResponse>> call, Throwable throwable) {
-                // TODO Network request fail
+                uiState.setValue(UiState.ERROR);
             }
         });
     }
