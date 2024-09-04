@@ -18,10 +18,13 @@
   - GET https://api.github.com/users?per_page=100
 - [Get a user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-a-user)
   - GET https://api.github.com/users/USERNAME
+- User repos
+  - GET https://api.github.com/users/USERNAME/repos
 
 ### Third party libs
 - Retrofit
-- OkHttp 
+- OkHttp
+- OkHttp logging-interceptor
 - Glide
 
 ---

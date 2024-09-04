@@ -11,6 +11,7 @@ glide = "4.16.0"
 gson = "2.11.0"
 squareup_retrofit = "2.11.0"
 squareup_okhttp = "4.10.0"
+logging_interceptor = "4.10.0"
 squareup_converter_gson = "2.9.0"
 
 
@@ -26,6 +27,7 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson"}
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide"}
 squareup_retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareup_retrofit"}
 squareup_okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "squareup_okhttp"}
+squareup_okhttp_logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "logging_interceptor"}
 squareup_converter_gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareup_converter_gson"}
 
 [plugins]

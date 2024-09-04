@@ -4,12 +4,15 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.viewmodel.ViewModelInitializer;
+
 import com.anna.githubtest.core.api.GitHubService;
 import com.anna.githubtest.core.api.GithubCline;
 import com.anna.githubtest.core.model.ListUsersResponse;
 import com.anna.githubtest.data.ListUsers;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,8 +36,11 @@ public class MainViewModel extends ViewModel {
 
     private final MutableLiveData<List<ListUsers>> userBasicList = new MutableLiveData<>();
 
+    /**
+     * Api ListUsers
+     */
     public void callApiGetListUsers() {
-        apiService.getListUsers(100).enqueue(new Callback<List<ListUsersResponse>>() {
+        apiService.fetchListUsers(100).enqueue(new Callback<List<ListUsersResponse>>() {
             @Override
             public void onResponse(Call<List<ListUsersResponse>> call, Response<List<ListUsersResponse>> response) {
                 List<ListUsers> itemDataList = new ArrayList<>();
@@ -42,9 +48,9 @@ public class MainViewModel extends ViewModel {
                     for (ListUsersResponse data : response.body()) {
                         ListUsers itemData = new ListUsers();
                         itemData.setId(data.getId());
-                        itemData.setImageUrl(data.getAvatar_url());
-                        itemData.setUserName(data.getLogin());
-                        itemData.setSiteAdmin(data.isSite_admin());
+                        itemData.setImageUrl(data.getAvatarUrl());
+                        itemData.setLoginID(data.getLogin());
+                        itemData.setSiteAdmin(data.isSiteAdmin());
                         itemDataList.add(itemData);
                     }
                 }

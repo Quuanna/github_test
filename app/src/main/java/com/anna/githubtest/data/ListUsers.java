@@ -9,7 +9,7 @@ public class ListUsers {
     private int id;
     private boolean siteAdmin;
     private String imageUrl;
-    private String userName;
+    private String loginID;
 
     public int getId() {
         return id;
@@ -35,25 +35,25 @@ public class ListUsers {
         this.imageUrl = value;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getLoginID() {
+        return loginID;
     }
 
-    public void setUserName(String value) {
-        this.userName = value;
+    public void setLoginID(String value) {
+        this.loginID = value;
     }
 
 
     @NotNull
     public String toString() {
-        return "ListUsers(id=" + this.id + ", siteAdmin=" + this.siteAdmin + ", imageUrl=" + this.imageUrl + ", userName=" + this.userName + ')';
+        return "ListUsers(id=" + this.id + ", siteAdmin=" + this.siteAdmin + ", imageUrl=" + this.imageUrl + ", userName=" + this.loginID + ')';
     }
 
     public int hashCode() {
         int result = Integer.hashCode(this.id);
         result = result * 31 + Boolean.hashCode(this.siteAdmin);
         result = result * 31 + this.imageUrl.hashCode();
-        result = result * 31 + this.userName.hashCode();
+        result = result * 31 + this.loginID.hashCode();
         return result;
     }
 
@@ -71,7 +71,7 @@ public class ListUsers {
             } else if (!Intrinsics.areEqual(this.imageUrl, var2.imageUrl)) {
                 return false;
             } else {
-                return Intrinsics.areEqual(this.userName, var2.userName);
+                return Intrinsics.areEqual(this.loginID, var2.loginID);
             }
         }
     }

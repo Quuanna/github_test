@@ -1,20 +1,24 @@
 package com.anna.githubtest.ui;
 
+import static com.anna.githubtest.ui.DetailActivity.getActivityIntent;
+
 import android.os.Bundle;
 import android.widget.LinearLayout;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.anna.githubtest.ui.adaper.UserInfoRVAdapter;
+
+import com.anna.githubtest.ui.adaper.UserInfoAdapter;
 import com.anna.githubtest.databinding.ActivityMainBinding;
 import com.anna.githubtest.ui.viewmodel.MainViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
     private MainViewModel mainViewModel;
-    private UserInfoRVAdapter userInfoRVAdapter;
+    private UserInfoAdapter userInfoAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +32,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView(ActivityMainBinding binding) {
-        userInfoRVAdapter = new UserInfoRVAdapter(new UserInfoRVAdapter.DiffUtilCallback());
-        binding.recyclerView.setAdapter(userInfoRVAdapter);
+        userInfoAdapter = new UserInfoAdapter(new UserInfoAdapter.DiffUtilCallback());
+        userInfoAdapter.addOnItemClickListener(onItemClickListener());
+        binding.recyclerView.setAdapter(userInfoAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayout.VERTICAL));
         binding.searchView.setOnQueryTextListener(onQueryTextListener());
@@ -42,9 +47,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void viewObserve() {
-        mainViewModel.getUserBasicList().observe(this, userList -> {
-            userInfoRVAdapter.setData(userList);
-        });
+        mainViewModel.getUserBasicList().observe(this, userList -> userInfoAdapter.setData(userList));
+    }
+
+    private UserInfoAdapter.OnItemClickListener onItemClickListener() {
+        return loginID -> startActivity(getActivityIntent(this, loginID));
     }
 
     private SearchView.OnQueryTextListener onQueryTextListener() {
@@ -56,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                userInfoRVAdapter.getFilter().filter(newText);
+                userInfoAdapter.getFilter().filter(newText);
                 return false;
             }
         };

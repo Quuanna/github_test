@@ -5,27 +5,35 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.anna.githubtest.R;
 import com.anna.githubtest.data.ListUsers;
 import com.anna.githubtest.databinding.ListItemUserViewBinding;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UserInfoRVAdapter extends ListAdapter<ListUsers, UserInfoRVAdapter.ItemViewHolder> implements Filterable {
+public class UserInfoAdapter extends ListAdapter<ListUsers, UserInfoAdapter.ItemViewHolder> implements Filterable {
 
     private ValueFilter valueFilter;
     private List<ListUsers> defaultFilterList = new ArrayList<>();
     private List<ListUsers> listUserItems = new ArrayList<>();
+    private OnItemClickListener onItemClickListener;
 
-    public UserInfoRVAdapter(@NonNull DiffUtil.ItemCallback<ListUsers> diffCallback) {
+    public UserInfoAdapter(@NonNull DiffUtil.ItemCallback<ListUsers> diffCallback) {
         super(diffCallback);
+    }
+
+    public void addOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
     }
 
     public void setData(List<ListUsers> list) {
@@ -58,7 +66,7 @@ public class UserInfoRVAdapter extends ListAdapter<ListUsers, UserInfoRVAdapter.
     }
 
 
-    public static class ItemViewHolder extends RecyclerView.ViewHolder {
+    public class ItemViewHolder extends RecyclerView.ViewHolder {
         ListItemUserViewBinding binding;
 
         public ItemViewHolder(ListItemUserViewBinding binding) {
@@ -73,12 +81,13 @@ public class UserInfoRVAdapter extends ListAdapter<ListUsers, UserInfoRVAdapter.
                     .into(binding.imagePhoto);
 
             binding.tvId.setText(String.valueOf(user.getId()));
-            binding.tvUserName.setText(user.getUserName());
+            binding.tvUserName.setText(user.getLoginID());
             binding.tvSiteAdmin.setText(
                     itemView.getContext().getString(R.string.site_admin, String.valueOf(user.isSiteAdmin())));
+
+            itemView.setOnClickListener(v -> onItemClickListener.openDetailPage(user.getLoginID()));
         }
     }
-
 
     public class ValueFilter extends Filter {
         @Override
@@ -91,8 +100,8 @@ public class UserInfoRVAdapter extends ListAdapter<ListUsers, UserInfoRVAdapter.
 
             } else {
                 List<ListUsers> filterList = defaultFilterList.stream()
-                        .filter(keyword -> keyword.getUserName().toLowerCase().contains(charSequence)
-                                || keyword.getUserName().toUpperCase().contains(charSequence))
+                        .filter(keyword -> keyword.getLoginID().toLowerCase().contains(charSequence)
+                                || keyword.getLoginID().toUpperCase().contains(charSequence))
                         .collect(Collectors.toList());
 
                 filterResults.count = filterList.size();
@@ -121,7 +130,11 @@ public class UserInfoRVAdapter extends ListAdapter<ListUsers, UserInfoRVAdapter.
 
         @Override
         public boolean areContentsTheSame(@NonNull ListUsers oldItem, @NonNull ListUsers newItem) {
-            return oldItem.getUserName().equals(newItem.getUserName());
+            return oldItem.getLoginID().equals(newItem.getLoginID());
         }
+    }
+
+    public interface OnItemClickListener {
+        void openDetailPage(String LoginID);
     }
 }

@@ -2,7 +2,7 @@ package com.anna.githubtest.core.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ListUsersResponse {
+public class GetUserDetailResponse {
     private String login;
     private int id;
     @SerializedName("node_id")
@@ -35,6 +35,25 @@ public class ListUsersResponse {
     private String type;
     @SerializedName("site_admin")
     private boolean siteAdmin;
+    private String name;
+    private String company;
+    private String blog;
+    private String location;
+    private Object email;
+    private Object hireable;
+    private Object bio;
+    @SerializedName("twitter_username")
+    private String twitterUsername;
+    @SerializedName("public_repos")
+    private int publicRepos;
+    @SerializedName("public_gists")
+    private int publicGists;
+    private int followers;
+    private int following;
+    @SerializedName("created_at")
+    private String createdAt;
+    @SerializedName("updated_at")
+    private String updatedAt;
 
     public String getLogin() {
         return login;
@@ -88,8 +107,8 @@ public class ListUsersResponse {
         return htmlUrl;
     }
 
-    public void setHtmlUrl(String htmlUrl) {
-        this.htmlUrl = htmlUrl;
+    public void setHtmlUrl(String html_url) {
+        this.htmlUrl = html_url;
     }
 
     public String getFollowersUrl() {
@@ -136,7 +155,7 @@ public class ListUsersResponse {
         return organizationsUrl;
     }
 
-    public void setOrganizations_url(String organizationsUrl) {
+    public void setOrganizationsUrl(String organizationsUrl) {
         this.organizationsUrl = organizationsUrl;
     }
 
@@ -152,7 +171,7 @@ public class ListUsersResponse {
         return eventsUrl;
     }
 
-    public void setEvents_url(String eventsUrl) {
+    public void setEventsUrl(String eventsUrl) {
         this.eventsUrl = eventsUrl;
     }
 
@@ -178,5 +197,117 @@ public class ListUsersResponse {
 
     public void setSiteAdmin(boolean siteAdmin) {
         this.siteAdmin = siteAdmin;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public String getBlog() {
+        return blog;
+    }
+
+    public void setBlog(String blog) {
+        this.blog = blog;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Object getEmail() {
+        return email;
+    }
+
+    public void setEmail(Object email) {
+        this.email = email;
+    }
+
+    public Object getHireable() {
+        return hireable;
+    }
+
+    public void setHireable(Object hireable) {
+        this.hireable = hireable;
+    }
+
+    public Object getBio() {
+        return bio;
+    }
+
+    public void setBio(Object bio) {
+        this.bio = bio;
+    }
+
+    public String getTwitterUsername() {
+        return twitterUsername;
+    }
+
+    public void setTwitterUsername(String twitterUsername) {
+        this.twitterUsername = twitterUsername;
+    }
+
+    public int getPublicRepos() {
+        return publicRepos;
+    }
+
+    public void setPublicRepos(int publicRepos) {
+        this.publicRepos = publicRepos;
+    }
+
+    public int getPublicGists() {
+        return publicGists;
+    }
+
+    public void setPublicGists(int publicGists) {
+        this.publicGists = publicGists;
+    }
+
+    public int getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(int followers) {
+        this.followers = followers;
+    }
+
+    public int getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(int following) {
+        this.following = following;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
