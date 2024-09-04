@@ -16,7 +16,7 @@ import retrofit2.Response;
 
 public class MainViewModel extends ViewModel {
 
-    private GitHubService apiService;
+    private final GitHubService apiService;
 
     public MainViewModel(GitHubService apiService) {
         this.apiService = apiService;
@@ -26,7 +26,6 @@ public class MainViewModel extends ViewModel {
             MainViewModel.class,
             creationExtras -> new MainViewModel(GithubCline.getInstance())
     );
-
 
     public LiveData<List<ListUsers>> getUserBasicList() {
         return userBasicList;
@@ -40,11 +39,12 @@ public class MainViewModel extends ViewModel {
             public void onResponse(Call<List<ListUsersResponse>> call, Response<List<ListUsersResponse>> response) {
                 List<ListUsers> itemDataList = new ArrayList<>();
                 if (response.isSuccessful() && response.body() != null) {
-                    for (ListUsersResponse item : response.body()) {
+                    for (ListUsersResponse data : response.body()) {
                         ListUsers itemData = new ListUsers();
-                        itemData.setImageUrl(item.getAvatar_url());
-                        itemData.setUserName(item.getLogin());
-                        itemData.setSiteAdmin(item.isSite_admin());
+                        itemData.setId(data.getId());
+                        itemData.setImageUrl(data.getAvatar_url());
+                        itemData.setUserName(data.getLogin());
+                        itemData.setSiteAdmin(data.isSite_admin());
                         itemDataList.add(itemData);
                     }
                 }

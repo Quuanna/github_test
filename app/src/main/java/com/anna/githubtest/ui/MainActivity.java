@@ -10,8 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.anna.githubtest.ui.adaper.UserInfoRVAdapter;
 import com.anna.githubtest.databinding.ActivityMainBinding;
 import com.anna.githubtest.ui.viewmodel.MainViewModel;
-import java.util.ArrayList;
-
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView(ActivityMainBinding binding) {
-        userInfoRVAdapter = new UserInfoRVAdapter(new ArrayList<>());
+        userInfoRVAdapter = new UserInfoRVAdapter(new UserInfoRVAdapter.DiffUtilCallback());
         binding.recyclerView.setAdapter(userInfoRVAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayout.VERTICAL));
@@ -45,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void viewObserve() {
         mainViewModel.getUserBasicList().observe(this, userList -> {
-            userInfoRVAdapter.setUserBasicList(userList);
+            userInfoRVAdapter.setData(userList);
         });
     }
 

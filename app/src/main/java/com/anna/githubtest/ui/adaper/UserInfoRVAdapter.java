@@ -5,37 +5,33 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
-
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.anna.githubtest.R;
 import com.anna.githubtest.data.ListUsers;
 import com.anna.githubtest.databinding.ListItemUserViewBinding;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UserInfoRVAdapter extends RecyclerView.Adapter<UserInfoRVAdapter.ItemViewHolder> implements Filterable {
+public class UserInfoRVAdapter extends ListAdapter<ListUsers, UserInfoRVAdapter.ItemViewHolder> implements Filterable {
 
     private ValueFilter valueFilter;
-    private static final ArrayList<ListUsers> defaultKeyWords = new ArrayList<>();
-    private static List<ListUsers> listUsersListItemData;
+    private List<ListUsers> defaultFilterList = new ArrayList<>();
+    private List<ListUsers> listUserItems = new ArrayList<>();
 
-    public UserInfoRVAdapter(List<ListUsers> listUserItemData) {
-        listUsersListItemData = listUserItemData;
-        defaultKeyWords.addAll(listUserItemData);
+    public UserInfoRVAdapter(@NonNull DiffUtil.ItemCallback<ListUsers> diffCallback) {
+        super(diffCallback);
     }
 
-    public void setUserBasicList(List<ListUsers> list) {
-        listUsersListItemData.clear();
-        defaultKeyWords.clear();
-        listUsersListItemData.addAll(list);
-        defaultKeyWords.addAll(list);
-        notifyDataSetChanged();
+    public void setData(List<ListUsers> list) {
+        listUserItems = list;
+        defaultFilterList = list;
+        submitList(list);
     }
 
     @Override
@@ -46,10 +42,6 @@ public class UserInfoRVAdapter extends RecyclerView.Adapter<UserInfoRVAdapter.It
         return valueFilter;
     }
 
-    @Override
-    public int getItemCount() {
-        return listUsersListItemData.size();
-    }
 
     @NonNull
     @Override
@@ -61,7 +53,7 @@ public class UserInfoRVAdapter extends RecyclerView.Adapter<UserInfoRVAdapter.It
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        ListUsers user = listUsersListItemData.get(position);
+        ListUsers user = listUserItems.get(position);
         holder.bindData(user);
     }
 
@@ -80,24 +72,25 @@ public class UserInfoRVAdapter extends RecyclerView.Adapter<UserInfoRVAdapter.It
                     .transform(new RoundedCorners(100))
                     .into(binding.imagePhoto);
 
+            binding.tvId.setText(String.valueOf(user.getId()));
             binding.tvUserName.setText(user.getUserName());
             binding.tvSiteAdmin.setText(
-                    itemView.getContext().getString(R.string.site_admin, String.valueOf(user.getSiteAdmin())));
+                    itemView.getContext().getString(R.string.site_admin, String.valueOf(user.isSiteAdmin())));
         }
     }
 
 
-    class ValueFilter extends Filter {
+    public class ValueFilter extends Filter {
         @Override
         protected FilterResults performFiltering(CharSequence charSequence) {
             FilterResults filterResults = new FilterResults();
 
             if (TextUtils.isEmpty(charSequence)) {
-                filterResults.count = defaultKeyWords.size();
-                filterResults.values = defaultKeyWords;
+                filterResults.count = defaultFilterList.size();
+                filterResults.values = defaultFilterList;
 
             } else {
-                List<ListUsers> filterList = defaultKeyWords.stream()
+                List<ListUsers> filterList = defaultFilterList.stream()
                         .filter(keyword -> keyword.getUserName().toLowerCase().contains(charSequence)
                                 || keyword.getUserName().toUpperCase().contains(charSequence))
                         .collect(Collectors.toList());
@@ -112,9 +105,23 @@ public class UserInfoRVAdapter extends RecyclerView.Adapter<UserInfoRVAdapter.It
         @Override
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
             if (filterResults.values instanceof ArrayList) {
-                listUsersListItemData = (List<ListUsers>) filterResults.values;
-                notifyDataSetChanged();
+                List<ListUsers> resultValue = (List<ListUsers>) filterResults.values;
+                listUserItems = resultValue;
+                submitList(resultValue);
             }
+        }
+    }
+
+    public static class DiffUtilCallback extends DiffUtil.ItemCallback<ListUsers> {
+
+        @Override
+        public boolean areItemsTheSame(@NonNull ListUsers oldItem, @NonNull ListUsers newItem) {
+            return oldItem.getId() == newItem.getId();
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull ListUsers oldItem, @NonNull ListUsers newItem) {
+            return oldItem.getUserName().equals(newItem.getUserName());
         }
     }
 }
