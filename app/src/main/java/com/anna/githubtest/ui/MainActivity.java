@@ -1,26 +1,37 @@
 package com.anna.githubtest.ui;
 
-import static com.anna.githubtest.ui.DetailActivity.getActivityIntent;
+import static com.anna.githubtest.ui.DetailActivity.INTENT_EXTRA_KEY;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.anna.githubtest.ui.adaper.UserInfoAdapter;
+import com.anna.githubtest.R;
+import com.anna.githubtest.data.ListUsers;
+import com.anna.githubtest.ui.adaper.ListUserAdapter;
 import com.anna.githubtest.databinding.ActivityMainBinding;
 import com.anna.githubtest.ui.viewmodel.MainViewModel;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private MainViewModel mainViewModel;
-    private UserInfoAdapter userInfoAdapter;
+    private MainViewModel viewModel;
+    private ListUserAdapter listUserAdapter;
+    private final List<ListUsers> listUsers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,42 +45,55 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        userInfoAdapter = new UserInfoAdapter(new UserInfoAdapter.DiffUtilCallback());
-        userInfoAdapter.addOnItemClickListener(onItemClickListener());
-        binding.recyclerView.setAdapter(userInfoAdapter);
+        listUserAdapter = new ListUserAdapter(new ListUserAdapter.DiffUtilCallback());
+        listUserAdapter.addOnItemClickListener(onItemClickListener());
+        binding.recyclerView.setAdapter(listUserAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayout.VERTICAL));
+        binding.recyclerView.addOnScrollListener(onScrollListener());
         binding.searchView.setOnQueryTextListener(onQueryTextListener());
     }
 
     private void initViewModel() {
-        mainViewModel = new ViewModelProvider(this,
+        viewModel = new ViewModelProvider(this,
                 ViewModelProvider.Factory.from(MainViewModel.initializer)).get(MainViewModel.class);
-        mainViewModel.callApiGetListUsers();
+        viewModel.callApiGetListUsers();
     }
 
     private void viewObserve() {
-        mainViewModel.getUiState().observe(this, uiState -> {
+        viewModel.getApiErrorMsg().observe(this, this::showDialogMsg);
+        viewModel.getUiState().observe(this, uiState -> {
             switch (uiState) {
                 case ERROR:
                     showProgress(false);
-                    Toast.makeText(this, "Network Request failed", Toast.LENGTH_LONG).show();
+                    showDialogMsg("Network Request failed");
                     break;
                 case LOADING:
                     showProgress(true);
                     break;
                 case SUCCESS:
                     showProgress(false);
-
                     break;
             }
         });
 
-        mainViewModel.getUserBasicList().observe(this, userList -> userInfoAdapter.setData(userList));
+        viewModel.getUserBasicList().observe(this, userList -> {
+                    listUsers.addAll(userList);
+                    List<ListUsers> newListUsers = listUsers.stream()
+                            .distinct()
+                            .sorted(Comparator.comparingInt(ListUsers::getId))
+                            .collect(Collectors.toList());
+                    listUserAdapter.setUpdateList(new ArrayList<>(newListUsers));
+                }
+        );
     }
 
-    private UserInfoAdapter.OnItemClickListener onItemClickListener() {
-        return loginID -> startActivity(getActivityIntent(this, loginID));
+    private ListUserAdapter.OnItemClickListener onItemClickListener() {
+        return loginID -> {
+            Intent intent = new Intent(this, DetailActivity.class);
+            intent.putExtra(INTENT_EXTRA_KEY, loginID);
+            startActivity(intent);
+        };
     }
 
     private SearchView.OnQueryTextListener onQueryTextListener() {
@@ -81,8 +105,24 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                userInfoAdapter.getFilter().filter(newText);
+                listUserAdapter.getFilter().filter(newText);
                 return false;
+            }
+        };
+    }
+
+    private RecyclerView.OnScrollListener onScrollListener() {
+        return new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null) {
+                    int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+                    if (lastVisibleItemPosition >= listUserAdapter.getItemCount() - 1) {
+                        viewModel.callApiNextPageGetListUsers();
+                    }
+                }
             }
         };
     }
@@ -92,6 +132,15 @@ public class MainActivity extends AppCompatActivity {
             binding.contentLoadingProgressBar.show();
         } else {
             binding.contentLoadingProgressBar.hide();
+        }
+    }
+
+    private void showDialogMsg(String errorMessage) {
+        if (errorMessage != null) {
+            new AlertDialog.Builder(this)
+                    .setMessage(errorMessage)
+                    .setPositiveButton(R.string.button_confirm, (dialog, i) -> dialog.dismiss())
+                    .show();
         }
     }
 }

@@ -21,14 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UserInfoAdapter extends ListAdapter<ListUsers, UserInfoAdapter.ItemViewHolder> implements Filterable {
+public class ListUserAdapter extends ListAdapter<ListUsers, ListUserAdapter.ItemViewHolder> implements Filterable {
 
     private ValueFilter valueFilter;
     private List<ListUsers> defaultFilterList = new ArrayList<>();
     private List<ListUsers> listUserItems = new ArrayList<>();
     private OnItemClickListener onItemClickListener;
 
-    public UserInfoAdapter(@NonNull DiffUtil.ItemCallback<ListUsers> diffCallback) {
+    public ListUserAdapter(@NonNull DiffUtil.ItemCallback<ListUsers> diffCallback) {
         super(diffCallback);
     }
 
@@ -36,7 +36,7 @@ public class UserInfoAdapter extends ListAdapter<ListUsers, UserInfoAdapter.Item
         this.onItemClickListener = onItemClickListener;
     }
 
-    public void setData(List<ListUsers> list) {
+    public void setUpdateList(List<ListUsers> list) {
         listUserItems = list;
         defaultFilterList = list;
         submitList(list);
@@ -51,20 +51,22 @@ public class UserInfoAdapter extends ListAdapter<ListUsers, UserInfoAdapter.Item
     }
 
 
+    @Override
+    public int getItemCount() {
+        return getCurrentList().size();
+    }
+
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ListItemUserViewBinding binding = ListItemUserViewBinding.inflate(
-                LayoutInflater.from(parent.getContext()), parent, false);
-        return new ItemViewHolder(binding);
+        return new ItemViewHolder(ListItemUserViewBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        ListUsers user = listUserItems.get(position);
-        holder.bindData(user);
+        holder.bind(listUserItems.get(position));
     }
-
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
         ListItemUserViewBinding binding;
@@ -74,7 +76,7 @@ public class UserInfoAdapter extends ListAdapter<ListUsers, UserInfoAdapter.Item
             this.binding = binding;
         }
 
-        public void bindData(ListUsers user) {
+        public void bind(ListUsers user) {
             Glide.with(itemView.getContext())
                     .load(user.getImageUrl())
                     .transform(new RoundedCorners(100))

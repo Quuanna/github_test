@@ -1,14 +1,12 @@
 package com.anna.githubtest.ui;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -27,47 +25,39 @@ import java.util.List;
 
 public class DetailActivity extends AppCompatActivity {
 
+    public static final String INTENT_EXTRA_KEY = "INTENT_EXTRA_KEY";
     private ActivityDetailBinding binding;
-    private DetailViewModel detailViewModel;
+    private DetailViewModel viewModel;
     private String loginId;
-    private static final String INTENT_EXTRA_KEY = "INTENT_EXTRA_KEY";
-
-    public static Intent getActivityIntent(Context context, String loginId) {
-        Intent intent = new Intent(context, DetailActivity.class);
-        intent.putExtra(INTENT_EXTRA_KEY, loginId);
-        return intent;
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         if (getIntent() != null) {
             loginId = getIntent().getStringExtra(INTENT_EXTRA_KEY);
         }
-
 
         initViewModel();
         viewObserve();
     }
 
     private void initViewModel() {
-        detailViewModel = new ViewModelProvider(this,
+        viewModel = new ViewModelProvider(this,
                 ViewModelProvider.Factory.from(DetailViewModel.initializer)).get(DetailViewModel.class);
-
         if (loginId != null) {
-            detailViewModel.callApiGetUserDetail(loginId);
+            viewModel.callApiGetUserDetail(loginId);
         }
     }
 
     private void viewObserve() {
-        detailViewModel.getUiState().observe(this, uiState -> {
+        viewModel.getApiErrorMsg().observe(this, this::showDialogMsg);
+        viewModel.getUiState().observe(this, uiState -> {
             switch (uiState) {
                 case ERROR:
                     showProgress(false);
-                    Toast.makeText(this, "Network Request failed", Toast.LENGTH_LONG).show();
+                    showDialogMsg("Network Request failed");
                     break;
                 case LOADING:
                     showProgress(true);
@@ -79,14 +69,14 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 
-        detailViewModel.getDetailInfo().observe(this, detailInfo -> {
+        viewModel.getDetailInfo().observe(this, detailInfo -> {
             setupView(detailInfo);
             if (loginId != null) {
-                detailViewModel.callApiPublicRepos(loginId);
+                viewModel.callApiPublicRepos(loginId);
             }
         });
 
-        detailViewModel.getPublicRepos().observe(this, this::setupRecyclerView);
+        viewModel.getPublicRepos().observe(this, this::setupRecyclerView);
     }
 
     private void setupView(DetailInfo info) {
@@ -130,6 +120,17 @@ public class DetailActivity extends AppCompatActivity {
             binding.contentLoadingProgressBar.show();
         } else {
             binding.contentLoadingProgressBar.hide();
+        }
+    }
+
+    private void showDialogMsg(String errorMessage) {
+        if (errorMessage != null) {
+            new AlertDialog.Builder(this)
+                    .setMessage(errorMessage)
+                    .setPositiveButton(R.string.button_confirm, (dialog, i) -> {
+                        finish();
+                        dialog.dismiss();
+                    }).show();
         }
     }
 }

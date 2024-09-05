@@ -2,4 +2,5 @@
     <string name="app_name">githubTest</string>
     <string name="site_admin">site admin %1$s</string>
     <string name="text_followers_and_following">%1$s followers / %2$s following</string>
+    <string name="button_confirm">確定</string>
 </resources>

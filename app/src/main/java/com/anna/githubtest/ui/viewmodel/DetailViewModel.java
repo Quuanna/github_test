@@ -20,6 +20,7 @@ import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import retrofit2.Response;
 
 public class DetailViewModel extends BaseViewModel {
 
@@ -53,24 +54,28 @@ public class DetailViewModel extends BaseViewModel {
         apiService.fetchUsersDetail(name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetUserDetailResponse>() {
+                .subscribe(new Observer<Response<GetUserDetailResponse>>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
                         uiState.setValue(UiState.LOADING);
                     }
 
                     @Override
-                    public void onNext(@NonNull GetUserDetailResponse response) {
+                    public void onNext(@NonNull Response<GetUserDetailResponse> response) {
                         DetailInfo info = new DetailInfo();
-                        info.setImageUrl(response.getAvatarUrl());
-                        info.setLogin(response.getLogin());
-                        info.setName(response.getName());
-                        info.setFollowers(response.getFollowers());
-                        info.setFollowing(response.getFollowing());
-                        info.setLocation(response.getLocation());
-                        info.setCompany(response.getCompany());
-                        info.setBlog(response.getBlog());
-                        detailInfo.postValue(info);
+                        if (response.isSuccessful() && response.body() != null) {
+                            info.setImageUrl(response.body().getAvatarUrl());
+                            info.setLogin(response.body().getLogin());
+                            info.setName(response.body().getName());
+                            info.setFollowers(response.body().getFollowers());
+                            info.setFollowing(response.body().getFollowing());
+                            info.setLocation(response.body().getLocation());
+                            info.setCompany(response.body().getCompany());
+                            info.setBlog(response.body().getBlog());
+                            detailInfo.postValue(info);
+                        } else {
+                            handelErrorMsg(response.code(), response.errorBody());
+                        }
                     }
 
                     @Override
@@ -94,23 +99,27 @@ public class DetailViewModel extends BaseViewModel {
         apiService.fetchUserRepos(name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<List<PublicReposResponse>>() {
+                .subscribe(new Observer<Response<List<PublicReposResponse>>>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
                         uiState.setValue(UiState.LOADING);
                     }
 
                     @Override
-                    public void onNext(@NonNull List<PublicReposResponse> response) {
+                    public void onNext(@NonNull Response<List<PublicReposResponse>> response) {
                         List<PublicRepos> list = new ArrayList<>();
-                        for (PublicReposResponse data : response) {
-                            PublicRepos repos = new PublicRepos();
-                            repos.setName(data.getName());
-                            repos.setDescription(data.getDescription());
-                            repos.setVisibility(data.getVisibility());
-                            list.add(repos);
+                        if (response.isSuccessful() && response.body() != null) {
+                            for (PublicReposResponse data : response.body()) {
+                                PublicRepos repos = new PublicRepos();
+                                repos.setName(data.getName());
+                                repos.setDescription(data.getDescription());
+                                repos.setVisibility(data.getVisibility());
+                                list.add(repos);
+                            }
+                            publicRepos.setValue(list);
+                        } else {
+                            handelErrorMsg(response.code(), response.errorBody());
                         }
-                        publicRepos.postValue(list);
                     }
 
                     @Override
