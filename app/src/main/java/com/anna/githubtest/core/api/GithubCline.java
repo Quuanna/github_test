@@ -5,6 +5,7 @@ import com.anna.githubtest.core.api.interceptor.HeaderInterceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GithubCline {
@@ -19,6 +20,7 @@ public class GithubCline {
                     retrofit = new Retrofit.Builder()
                             .baseUrl(WEB_HOST)
                             .client(client())
+                            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                             .addConverterFactory(GsonConverterFactory.create())
                             .build();
                 }

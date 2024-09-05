@@ -2,7 +2,6 @@ package com.anna.githubtest.ui.viewmodel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.viewmodel.ViewModelInitializer;
 
 import com.anna.githubtest.core.api.GitHubService;
@@ -16,9 +15,11 @@ import com.anna.githubtest.element.UiState;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class DetailViewModel extends BaseViewModel {
 
@@ -35,6 +36,7 @@ public class DetailViewModel extends BaseViewModel {
     public LiveData<DetailInfo> getDetailInfo() {
         return detailInfo;
     }
+
     public LiveData<List<PublicRepos>> getPublicRepos() {
         return publicRepos;
     }
@@ -48,30 +50,39 @@ public class DetailViewModel extends BaseViewModel {
      * @param name login
      */
     public void callApiGetUserDetail(String name) {
-        uiState.setValue(UiState.LOADING);
-        apiService.fetchUsersDetail(name).enqueue(new Callback<GetUserDetailResponse>() {
-            @Override
-            public void onResponse(Call<GetUserDetailResponse> call, Response<GetUserDetailResponse> response) {
-                DetailInfo info = new DetailInfo();
-                if (response.isSuccessful() && response.body() != null) {
-                    info.setImageUrl(response.body().getAvatarUrl());
-                    info.setLogin(response.body().getLogin());
-                    info.setName(response.body().getName());
-                    info.setFollowers(response.body().getFollowers());
-                    info.setFollowing(response.body().getFollowing());
-                    info.setLocation(response.body().getLocation());
-                    info.setCompany(response.body().getCompany());
-                    info.setBlog(response.body().getBlog());
-                }
-                detailInfo.postValue(info);
-                uiState.setValue(UiState.SUCCESS);
-            }
+        apiService.fetchUsersDetail(name)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<GetUserDetailResponse>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        uiState.setValue(UiState.LOADING);
+                    }
 
-            @Override
-            public void onFailure(Call<GetUserDetailResponse> call, Throwable throwable) {
-                uiState.setValue(UiState.ERROR);
-            }
-        });
+                    @Override
+                    public void onNext(@NonNull GetUserDetailResponse response) {
+                        DetailInfo info = new DetailInfo();
+                        info.setImageUrl(response.getAvatarUrl());
+                        info.setLogin(response.getLogin());
+                        info.setName(response.getName());
+                        info.setFollowers(response.getFollowers());
+                        info.setFollowing(response.getFollowing());
+                        info.setLocation(response.getLocation());
+                        info.setCompany(response.getCompany());
+                        info.setBlog(response.getBlog());
+                        detailInfo.postValue(info);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        uiState.setValue(UiState.ERROR);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        uiState.setValue(UiState.SUCCESS);
+                    }
+                });
     }
 
     /**
@@ -80,28 +91,37 @@ public class DetailViewModel extends BaseViewModel {
      * @param name login
      */
     public void callApiPublicRepos(String name) {
-        uiState.setValue(UiState.LOADING);
-        apiService.fetchUserRepos(name).enqueue(new Callback<List<PublicReposResponse>>() {
-            @Override
-            public void onResponse(Call<List<PublicReposResponse>> call, Response<List<PublicReposResponse>> response) {
-                List<PublicRepos> list = new ArrayList<>();
-                if (response.isSuccessful() && response.body() != null) {
-                    for (PublicReposResponse data : response.body()) {
-                        PublicRepos repos = new PublicRepos();
-                        repos.setName(data.getName());
-                        repos.setDescription(data.getDescription());
-                        repos.setVisibility(data.getVisibility());
-                        list.add(repos);
+        apiService.fetchUserRepos(name)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<PublicReposResponse>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        uiState.setValue(UiState.LOADING);
                     }
-                }
-                publicRepos.postValue(list);
-                uiState.setValue(UiState.SUCCESS);
-            }
 
-            @Override
-            public void onFailure(Call<List<PublicReposResponse>> call, Throwable throwable) {
-                uiState.setValue(UiState.ERROR);
-            }
-        });
+                    @Override
+                    public void onNext(@NonNull List<PublicReposResponse> response) {
+                        List<PublicRepos> list = new ArrayList<>();
+                        for (PublicReposResponse data : response) {
+                            PublicRepos repos = new PublicRepos();
+                            repos.setName(data.getName());
+                            repos.setDescription(data.getDescription());
+                            repos.setVisibility(data.getVisibility());
+                            list.add(repos);
+                        }
+                        publicRepos.postValue(list);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        uiState.setValue(UiState.ERROR);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        uiState.setValue(UiState.SUCCESS);
+                    }
+                });
     }
 }

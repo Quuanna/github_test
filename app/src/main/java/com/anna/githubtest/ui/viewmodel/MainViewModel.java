@@ -13,9 +13,12 @@ import com.anna.githubtest.element.UiState;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 
 public class MainViewModel extends BaseViewModel {
 
@@ -39,29 +42,38 @@ public class MainViewModel extends BaseViewModel {
      * Api ListUsers
      */
     public void callApiGetListUsers() {
-        uiState.setValue(UiState.LOADING);
-        apiService.fetchListUsers(100).enqueue(new Callback<List<ListUsersResponse>>() {
-            @Override
-            public void onResponse(Call<List<ListUsersResponse>> call, Response<List<ListUsersResponse>> response) {
-                List<ListUsers> itemDataList = new ArrayList<>();
-                if (response.isSuccessful() && response.body() != null) {
-                    for (ListUsersResponse data : response.body()) {
-                        ListUsers itemData = new ListUsers();
-                        itemData.setId(data.getId());
-                        itemData.setImageUrl(data.getAvatarUrl());
-                        itemData.setLoginID(data.getLogin());
-                        itemData.setSiteAdmin(data.isSiteAdmin());
-                        itemDataList.add(itemData);
+        apiService.fetchListUsers(100)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<ListUsersResponse>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        uiState.setValue(UiState.LOADING);
                     }
-                }
-                userBasicList.postValue(itemDataList);
-                uiState.setValue(UiState.SUCCESS);
-            }
 
-            @Override
-            public void onFailure(Call<List<ListUsersResponse>> call, Throwable throwable) {
-                uiState.setValue(UiState.ERROR);
-            }
-        });
+                    @Override
+                    public void onNext(@NonNull List<ListUsersResponse> listUsersResponses) {
+                        List<ListUsers> itemDataList = new ArrayList<>();
+                        for (ListUsersResponse data : listUsersResponses) {
+                            ListUsers itemData = new ListUsers();
+                            itemData.setId(data.getId());
+                            itemData.setImageUrl(data.getAvatarUrl());
+                            itemData.setLoginID(data.getLogin());
+                            itemData.setSiteAdmin(data.isSiteAdmin());
+                            itemDataList.add(itemData);
+                        }
+                        userBasicList.postValue(itemDataList);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        uiState.setValue(UiState.ERROR);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        uiState.setValue(UiState.SUCCESS);
+                    }
+                });
     }
 }

@@ -10,10 +10,12 @@ constraintlayout = "2.1.4"
 glide = "4.16.0"
 gson = "2.11.0"
 squareup_retrofit = "2.11.0"
-squareup_okhttp = "4.10.0"
-logging_interceptor = "4.10.0"
-squareup_converter_gson = "2.9.0"
-
+squareup_okhttp = "4.12.0"
+logging_interceptor = "4.12.0"
+squareup_converter_gson = "2.11.0"
+squareup_retrofit_adapter_rxjava = "2.11.0"
+reactivex_rxjava = "3.1.8"
+reactivex_rxandroid = "3.0.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -29,6 +31,9 @@ squareup_retrofit = { group = "com.squareup.retrofit2", name = "retrofit", versi
 squareup_okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "squareup_okhttp"}
 squareup_okhttp_logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "logging_interceptor"}
 squareup_converter_gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareup_converter_gson"}
+squareup_retrofit_adapter_rxjava = { group = "com.squareup.retrofit2", name = "adapter-rxjava3", version.ref = "squareup_retrofit_adapter_rxjava" }
+reactivex_rxjava = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "reactivex_rxjava" }
+reactivex_rxandroid = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "reactivex_rxandroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

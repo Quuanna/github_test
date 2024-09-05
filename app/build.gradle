@@ -45,6 +45,10 @@ dependencies {
     implementation libs.squareup.converter.gson
     implementation libs.squareup.okhttp
     implementation libs.squareup.okhttp.logging
+    implementation libs.squareup.retrofit.adapter.rxjava
+
+    implementation libs.reactivex.rxjava
+    implementation libs.reactivex.rxandroid
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
