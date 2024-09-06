@@ -1,42 +1,37 @@
-# Goal 
-## List GitHub users.
+<img src="https://github.com/user-attachments/assets/ea52000e-a3e2-4fe8-945a-bc46aab41fc3" width="250px">
+<img src="https://github.com/user-attachments/assets/ee772cfe-a6f8-47b3-a470-ee6753317409" width="250px">
+<img src="https://github.com/user-attachments/assets/4d090d94-42b8-4942-8995-bc3a3f9f0aae" width="250px">
 
-### Architecture
-- MVVM
-
-### UI 
-- Implement SearchBar 
-- Implement Show users in list use RecyclerView component 
-- In list, item view show info including image from “avatar_url”, “login”, and “site_admin”.
-
-### Network Request 
-- Network Request Implement with multi Thread
-- Limit results to 100 users in total
-
-### API
-- [List users](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users)
-  - GET https://api.github.com/users?per_page=100
-- [Get a user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-a-user)
+# Implemented
+### List GitHub users.
+- Architecture: MVVM
+- UI:
+  - Implement SearchBar with filter
+  - Implement RecyclerView with ListAdapter
+  - Implement item view show info including image from “avatar_url”, “login”, and “site_admin”
+  - Implement pagination start from "since=0, page size=20" **(Bonus)**
+  - Implement clicking Item Open Detailed information **(Bonus)**
+- Network Request:
+  - Network Request work in background thread
+  - Implement connection issues  **(Bonus)**
+---
+### GitHub User API
+-  list: [List users](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users)
+  - GET https://api.github.com/users?per_page=20&since=0
+- detailed info: [Get a user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-a-user)
   - GET https://api.github.com/users/USERNAME
-- User repos
+- detailed info User repos
   - GET https://api.github.com/users/USERNAME/repos
 
 ### Third party libs
-- Retrofit
-- OkHttp
-- OkHttp logging-interceptor
-- Glide
+- [ReactiveX RxJava](https://github.com/ReactiveX/RxJava)
+- [Square Adapter-rxjava3](https://github.com/square/retrofit/tree/trunk/retrofit-adapters/rxjava3)
+- [Square Retrofit](https://github.com/square/retrofit)
+- [Square OkHttp](https://github.com/square/okhttp)
+- [Square OkHttp logging-interceptor](https://github.com/square/okhttp/tree/master/okhttp-logging-interceptor)
+- [BumpTech Glide](https://github.com/bumptech/glide?tab=readme-ov-file)
 
----
-# Bonus (if there is free time)
-### UI
-- Implement pagination
-- Implement Clicking Item Open Detailed information
-
-### Network Request
-- Implement Handle caching 
-- Implement connection issues
-
-### Test 
+# Not implemented Bonus
 - Unit tests
 - UI tests
+- Implement Handle caching
