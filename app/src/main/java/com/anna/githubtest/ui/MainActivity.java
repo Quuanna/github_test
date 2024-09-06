@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         initView();
         initViewModel();
-        viewObserve();
+        viewDataObserve();
     }
 
     private void initView() {
@@ -60,24 +60,13 @@ public class MainActivity extends AppCompatActivity {
         viewModel.callApiGetListUsers();
     }
 
-    private void viewObserve() {
-        viewModel.getApiErrorMsg().observe(this, this::showDialogMsg);
-        viewModel.getUiState().observe(this, uiState -> {
-            switch (uiState) {
-                case ERROR:
-                    showProgress(false);
-                    showDialogMsg("Network Request failed");
-                    break;
-                case LOADING:
-                    showProgress(true);
-                    break;
-                case SUCCESS:
-                    showProgress(false);
-                    break;
-            }
-        });
+    private void viewDataObserve() {
+        uiStateObserve();
+        userListObserve();
+    }
 
-        viewModel.getUserBasicList().observe(this, userList -> {
+    private void userListObserve() {
+        viewModel.getUserList().observe(this, userList -> {
                     listUsers.addAll(userList);
                     List<ListUsers> newListUsers = listUsers.stream()
                             .distinct()
@@ -86,6 +75,19 @@ public class MainActivity extends AppCompatActivity {
                     listUserAdapter.setUpdateList(new ArrayList<>(newListUsers));
                 }
         );
+    }
+
+    private void uiStateObserve() {
+        viewModel.getUiState().observe(this, uiState -> {
+            if (uiState instanceof UiState.Loading) {
+                showProgress(true);
+            } else if (uiState instanceof UiState.Error) {
+                String message = ((UiState.Error) uiState).getMessage();
+                showDialogMsg(message);
+            } else if (uiState instanceof UiState.Success) {
+                showProgress(false);
+            }
+        });
     }
 
     private ListUserAdapter.OnItemClickListener onItemClickListener() {

@@ -8,7 +8,7 @@ import com.anna.githubtest.core.api.GitHubService;
 import com.anna.githubtest.core.api.GithubCline;
 import com.anna.githubtest.core.model.ListUsersResponse;
 import com.anna.githubtest.data.ListUsers;
-import com.anna.githubtest.element.UiState;
+import com.anna.githubtest.ui.UiState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +38,12 @@ public class MainViewModel extends BaseViewModel {
             MainViewModel.class, creationExtras -> new MainViewModel(GithubCline.getInstance())
     );
 
-    public LiveData<List<ListUsers>> getUserBasicList() {
+    public LiveData<List<ListUsers>> getUserList() {
         return userBasicList;
     }
 
     private final MutableLiveData<List<ListUsers>> userBasicList = new MutableLiveData<>();
+    private Boolean isApiSpeedLimit = false;
 
     /**
      * Api ListUsers
@@ -58,6 +59,9 @@ public class MainViewModel extends BaseViewModel {
      * Api ListUsers Next Page
      */
     public void callApiNextPageGetListUsers() {
+        if (isApiSpeedLimit) {
+            return;
+        }
         Observable<Response<List<ListUsersResponse>>> observable =
                 nextPageDeferObservable.flatMap(url ->
                         apiService.fetchListUserNextPage(url)
@@ -73,7 +77,7 @@ public class MainViewModel extends BaseViewModel {
         return new Observer<Response<List<ListUsersResponse>>>() {
             @Override
             public void onSubscribe(@NonNull Disposable d) {
-                uiState.setValue(UiState.LOADING);
+                handleUiState(UiState.Loading.getInstance());
             }
 
             @Override
@@ -82,18 +86,21 @@ public class MainViewModel extends BaseViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     setupItemData(response.body());
                 } else {
+                    if (response.code() == 403) {
+                        isApiSpeedLimit = true;
+                    }
                     handelErrorMsg(response.code(), response.errorBody());
                 }
             }
 
             @Override
             public void onError(@NonNull Throwable e) {
-                uiState.setValue(UiState.ERROR);
+                handleUiState(new UiState.Error(e.getMessage()));
             }
 
             @Override
             public void onComplete() {
-                uiState.setValue(UiState.SUCCESS);
+                handleUiState(UiState.Success.getInstance());
             }
         };
     }

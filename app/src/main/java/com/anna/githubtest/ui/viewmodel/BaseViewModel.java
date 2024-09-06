@@ -4,8 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.anna.githubtest.element.UiState;
-import com.anna.githubtest.util.SingleLiveEvent;
+import com.anna.githubtest.ui.UiState;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,12 +19,11 @@ public class BaseViewModel extends ViewModel {
         return uiState;
     }
 
-    public LiveData<String> getApiErrorMsg() {
-        return apiErrorMsg;
-    }
-
     protected final MutableLiveData<UiState> uiState = new MutableLiveData<>();
-    protected final SingleLiveEvent<String> apiErrorMsg = new SingleLiveEvent<>();
+
+    protected void handleUiState(UiState state) {
+        uiState.setValue(state);
+    }
 
     protected void handelErrorMsg(int code, ResponseBody errorBody) {
         try {
@@ -33,10 +31,10 @@ public class BaseViewModel extends ViewModel {
                 String errorJson = errorBody.string();
                 JSONObject jsonObject = new JSONObject(errorJson);
                 String message = jsonObject.getString("message");
-                apiErrorMsg.setValue(code + "\n" + message);
+                handleUiState(new UiState.Error(code + "\n" + message));
             }
         } catch (IOException | JSONException e) {
-            uiState.setValue(UiState.ERROR);
+            handleUiState(new UiState.Error());
         }
     }
 }

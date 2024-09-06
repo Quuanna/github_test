@@ -10,7 +10,7 @@ import com.anna.githubtest.core.model.GetUserDetailResponse;
 import com.anna.githubtest.core.model.PublicReposResponse;
 import com.anna.githubtest.data.DetailInfo;
 import com.anna.githubtest.data.PublicRepos;
-import com.anna.githubtest.element.UiState;
+import com.anna.githubtest.ui.UiState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,22 +57,13 @@ public class DetailViewModel extends BaseViewModel {
                 .subscribe(new Observer<Response<GetUserDetailResponse>>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-                        uiState.setValue(UiState.LOADING);
+                        handleUiState(UiState.Loading.getInstance());
                     }
 
                     @Override
                     public void onNext(@NonNull Response<GetUserDetailResponse> response) {
-                        DetailInfo info = new DetailInfo();
                         if (response.isSuccessful() && response.body() != null) {
-                            info.setImageUrl(response.body().getAvatarUrl());
-                            info.setLogin(response.body().getLogin());
-                            info.setName(response.body().getName());
-                            info.setFollowers(response.body().getFollowers());
-                            info.setFollowing(response.body().getFollowing());
-                            info.setLocation(response.body().getLocation());
-                            info.setCompany(response.body().getCompany());
-                            info.setBlog(response.body().getBlog());
-                            detailInfo.postValue(info);
+                            setupDetailInfoViewData(response.body());
                         } else {
                             handelErrorMsg(response.code(), response.errorBody());
                         }
@@ -80,12 +71,12 @@ public class DetailViewModel extends BaseViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        uiState.setValue(UiState.ERROR);
+                        handleUiState(new UiState.Error(e.getMessage()));
                     }
 
                     @Override
                     public void onComplete() {
-                        uiState.setValue(UiState.SUCCESS);
+                        handleUiState(UiState.Success.getInstance());
                     }
                 });
     }
@@ -102,21 +93,13 @@ public class DetailViewModel extends BaseViewModel {
                 .subscribe(new Observer<Response<List<PublicReposResponse>>>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-                        uiState.setValue(UiState.LOADING);
+                        handleUiState(UiState.Loading.getInstance());
                     }
 
                     @Override
                     public void onNext(@NonNull Response<List<PublicReposResponse>> response) {
-                        List<PublicRepos> list = new ArrayList<>();
                         if (response.isSuccessful() && response.body() != null) {
-                            for (PublicReposResponse data : response.body()) {
-                                PublicRepos repos = new PublicRepos();
-                                repos.setName(data.getName());
-                                repos.setDescription(data.getDescription());
-                                repos.setVisibility(data.getVisibility());
-                                list.add(repos);
-                            }
-                            publicRepos.setValue(list);
+                            setupPublicReposViewDta(response.body());
                         } else {
                             handelErrorMsg(response.code(), response.errorBody());
                         }
@@ -124,13 +107,38 @@ public class DetailViewModel extends BaseViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        uiState.setValue(UiState.ERROR);
+                        handleUiState(new UiState.Error(e.getMessage()));
                     }
 
                     @Override
                     public void onComplete() {
-                        uiState.setValue(UiState.SUCCESS);
+                        handleUiState(UiState.Success.getInstance());
                     }
                 });
+    }
+
+    private void setupPublicReposViewDta(List<PublicReposResponse> response) {
+        List<PublicRepos> list = new ArrayList<>();
+        for (PublicReposResponse data : response) {
+            PublicRepos repos = new PublicRepos();
+            repos.setName(data.getName());
+            repos.setDescription(data.getDescription());
+            repos.setVisibility(data.getVisibility());
+            list.add(repos);
+        }
+        publicRepos.setValue(list);
+    }
+
+    private void setupDetailInfoViewData(GetUserDetailResponse response) {
+        DetailInfo info = new DetailInfo();
+        info.setImageUrl(response.getAvatarUrl());
+        info.setLogin(response.getLogin());
+        info.setName(response.getName());
+        info.setFollowers(response.getFollowers());
+        info.setFollowing(response.getFollowing());
+        info.setLocation(response.getLocation());
+        info.setCompany(response.getCompany());
+        info.setBlog(response.getBlog());
+        detailInfo.postValue(info);
     }
 }
