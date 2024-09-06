@@ -65,13 +65,13 @@ public class DetailViewModel extends BaseViewModel {
                         if (response.isSuccessful() && response.body() != null) {
                             setupDetailInfoViewData(response.body());
                         } else {
-                            handelErrorMsg(response.code(), response.errorBody());
+                            handelApiErrorMsg(response.code(), response.errorBody());
                         }
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        handleUiState(new UiState.Error(e.getMessage()));
+                        handelExceptionErrorMsg(new UiState.Error(e.getMessage()));
                     }
 
                     @Override
@@ -101,13 +101,13 @@ public class DetailViewModel extends BaseViewModel {
                         if (response.isSuccessful() && response.body() != null) {
                             setupPublicReposViewDta(response.body());
                         } else {
-                            handelErrorMsg(response.code(), response.errorBody());
+                            handelApiErrorMsg(response.code(), response.errorBody());
                         }
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        handleUiState(new UiState.Error(e.getMessage()));
+                        handelExceptionErrorMsg(new UiState.Error(e.getMessage()));
                     }
 
                     @Override

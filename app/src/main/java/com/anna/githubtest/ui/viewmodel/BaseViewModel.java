@@ -16,27 +16,41 @@ import okhttp3.ResponseBody;
 public class BaseViewModel extends ViewModel {
 
     public LiveData<UiState> getUiState() {return uiState;}
-    private boolean isSingleEvent = false;
+    protected boolean isSingleEvent = false;
     protected final MutableLiveData<UiState> uiState = new MutableLiveData<>();
 
+    /**
+     * Handle Loading、Success
+     */
     protected void handleUiState(UiState state) {
-        if (isSingleEvent && state instanceof UiState.Error) {
-            return;
-        }
-        isSingleEvent = true;
         uiState.setValue(state);
     }
 
-    protected void handelErrorMsg(int code, ResponseBody errorBody) {
+    /**
+     * Handle Exception SingleEvent
+     */
+    protected void handelExceptionErrorMsg(UiState.Error error) {
+        if (isSingleEvent) {return;}
+        uiState.setValue(error);
+        isSingleEvent = true;
+    }
+
+
+    /**
+     * Handle ApiError SingleEvent
+     */
+    protected void handelApiErrorMsg(int code, ResponseBody errorBody) {
+        if (isSingleEvent) {return;}
         try {
             if (errorBody != null) {
                 String errorJson = errorBody.string();
                 JSONObject jsonObject = new JSONObject(errorJson);
                 String message = jsonObject.getString("message");
-                handleUiState(new UiState.Error(code + "\n" + message));
+                uiState.setValue(new UiState.Error(code + "\n" + message));
+                isSingleEvent = true;
             }
         } catch (IOException | JSONException e) {
-            handleUiState(new UiState.Error());
+            handelExceptionErrorMsg(new UiState.Error(e.getMessage()));
         }
     }
 }

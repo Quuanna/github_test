@@ -141,7 +141,10 @@ public class MainActivity extends AppCompatActivity {
         if (errorMessage != null) {
             new AlertDialog.Builder(this)
                     .setMessage(errorMessage)
-                    .setPositiveButton(R.string.button_confirm, (dialog, i) -> dialog.dismiss())
+                    .setPositiveButton(R.string.button_confirm, (dialog, i) -> {
+                        dialog.dismiss();
+                        finishAffinity();
+                    })
                     .show();
         }
     }

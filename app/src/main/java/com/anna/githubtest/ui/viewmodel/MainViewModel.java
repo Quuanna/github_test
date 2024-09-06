@@ -43,7 +43,6 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private final MutableLiveData<List<ListUsers>> userBasicList = new MutableLiveData<>();
-    private Boolean isApiSpeedLimit = false;
 
     /**
      * Api ListUsers
@@ -59,9 +58,6 @@ public class MainViewModel extends BaseViewModel {
      * Api ListUsers Next Page
      */
     public void callApiNextPageGetListUsers() {
-        if (isApiSpeedLimit) {
-            return;
-        }
         Observable<Response<List<ListUsersResponse>>> observable =
                 nextPageDeferObservable.flatMap(url ->
                         apiService.fetchListUserNextPage(url)
@@ -86,16 +82,13 @@ public class MainViewModel extends BaseViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     setupItemData(response.body());
                 } else {
-                    if (response.code() == 403) {
-                        isApiSpeedLimit = true;
-                    }
-                    handelErrorMsg(response.code(), response.errorBody());
+                    handelApiErrorMsg(response.code(), response.errorBody());
                 }
             }
 
             @Override
             public void onError(@NonNull Throwable e) {
-                handleUiState(new UiState.Error(e.getMessage()));
+                handelExceptionErrorMsg(new UiState.Error(e.getMessage()));
             }
 
             @Override
