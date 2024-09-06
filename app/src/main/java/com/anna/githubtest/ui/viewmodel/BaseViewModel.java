@@ -15,13 +15,15 @@ import okhttp3.ResponseBody;
 
 public class BaseViewModel extends ViewModel {
 
-    public LiveData<UiState> getUiState() {
-        return uiState;
-    }
-
+    public LiveData<UiState> getUiState() {return uiState;}
+    private boolean isSingleEvent = false;
     protected final MutableLiveData<UiState> uiState = new MutableLiveData<>();
 
     protected void handleUiState(UiState state) {
+        if (isSingleEvent && state instanceof UiState.Error) {
+            return;
+        }
+        isSingleEvent = true;
         uiState.setValue(state);
     }
 
